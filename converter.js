@@ -50,6 +50,9 @@ async function main() {
     // Create the layout file
     await createLayoutFile();
 
+    // Create the index file
+    await createIndexFile(chapterDirs);
+
     console.log('Conversion complete! The `docs` folder is ready.');
 }
 
@@ -170,6 +173,35 @@ async function createLayoutFile() {
 </html>
 `;
     await fs.writeFile(path.join(layoutDir, 'default.html'), layoutContent);
+}
+
+async function createIndexFile(chapterDirs) {
+    const indexPath = path.join(outputDir, 'index.md');
+    let indexContent = `---
+layout: default
+title: "The Getter Manual - Table of Contents"
+---
+
+# The Getter Fat Loss Manual
+
+This is an open-source, syndicated version of the official [Getter Fat Loss Manual](https://getter.club/fat-loss). The content is provided here for discoverability. For the best reading experience, please view the original version.
+
+---
+
+## Table of Contents
+
+`;
+
+    const chapterLinks = chapterDirs.map(dir => {
+        const slug = path.basename(dir);
+        if (slug === 'disclaimer') return null;
+        const title = slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        return `- [${title}](./${slug})`;
+    }).filter(Boolean).join('\n');
+
+    indexContent += chapterLinks;
+
+    await fs.writeFile(indexPath, indexContent);
 }
 
 main(); 
